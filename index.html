@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VocabLearn! — Learn Words, Change Your World</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #388E3C;
+    --green-light: #4CAF50;
+    --green-pale: #E8F5E9;
+    --green-dark: #1B5E20;
+    --cream: #FAFAF7;
+    --text: #1a1a1a;
+    --muted: #666;
+    --card: #fff;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── CANVAS ── */
+  #canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.18;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+    background: rgba(250,250,247,0.85);
+    border-bottom: 1px solid rgba(56,142,60,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--green);
+    text-decoration: none;
+  }
+
+  .nav-cta {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+
+  .nav-cta:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--green-pale);
+    color: var(--green-dark);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(56,142,60,0.2);
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero h1 span {
+    color: var(--green);
+    position: relative;
+  }
+
+  .hero h1 span::after {
+    content: '';
+    position: absolute;
+    bottom: 4px; left: 0; right: 0;
+    height: 4px;
+    background: var(--green-light);
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+    padding: 0.9rem 2.2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(56,142,60,0.35);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 0.9rem 2.2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--green);
+    transform: translateY(-3px);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 4rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--green);
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* ── PHONE MOCKUP ── */
+  .phone-section {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 2rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .phone {
+    width: 280px;
+    height: 560px;
+    background: #1a1a1a;
+    border-radius: 40px;
+    padding: 16px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1);
+    animation: float 4s ease-in-out infinite;
+    position: relative;
+  }
+
+  .phone::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: #F0F4F0;
+    border-radius: 28px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .phone-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--green);
+  }
+
+  .phone-word-card {
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+
+  .phone-word {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #222;
+  }
+
+  .phone-hint {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 0.3rem;
+  }
+
+  .phone-input {
+    background: white;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    width: 100%;
+    font-size: 0.85rem;
+    color: #555;
+    text-align: center;
+  }
+
+  .phone-btn {
+    background: var(--green);
+    color: white;
+    border-radius: 10px;
+    padding: 0.7rem;
+    width: 100%;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .phone-progress-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.7rem;
+    color: #999;
+  }
+
+  .phone-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .phone-progress-fill {
+    width: 60%;
+    height: 100%;
+    background: var(--green);
+    border-radius: 3px;
+    animation: progressAnim 2s ease-in-out infinite alternate;
+  }
+
+  /* ── FEATURES ── */
+  .section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    margin-bottom: 3.5rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: transform 0.3s, box-shadow 0.3s;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .feature-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .feature-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── LANGUAGES ── */
+  .langs-section {
+    position: relative;
+    z-index: 1;
+    background: var(--green-dark);
+    color: white;
+    padding: 5rem 2rem;
+    overflow: hidden;
+  }
+
+  .langs-section::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -10%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(76,175,80,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .langs-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .langs-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .langs-sub {
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 3rem;
+    font-size: 1.1rem;
+  }
+
+  .langs-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .lang-chip {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s, transform 0.2s;
+    cursor: default;
+  }
+
+  .lang-chip:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  /* ── HOW IT WORKS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    position: relative;
+  }
+
+  .step {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .step.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .step-num {
+    width: 56px;
+    height: 56px;
+    background: var(--green);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    margin: 0 auto 1.2rem;
+  }
+
+  .step h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .step p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── STREAK ── */
+  .streak-section {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
+    color: white;
+    padding: 5rem 2rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .streak-section::after {
+    content: '🔥';
+    position: absolute;
+    font-size: 20rem;
+    opacity: 0.05;
+    top: -40px;
+    right: -40px;
+    pointer-events: none;
+  }
+
+  .streak-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 1rem;
+  }
+
+  .streak-sub {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.7);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 7rem 2rem;
+  }
+
+  .cta-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .cta-title span { color: var(--green); }
+
+  .cta-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 2rem;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+  }
+
+  @keyframes progressAnim {
+    from { width: 40%; }
+    to { width: 80%; }
+  }
+
+  @keyframes scrollMarquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    padding: 1.5rem 0;
+    background: var(--green-pale);
+    border-top: 1px solid rgba(56,142,60,0.15);
+    border-bottom: 1px solid rgba(56,142,60,0.15);
+  }
+
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    animation: scrollMarquee 25s linear infinite;
+    width: max-content;
+  }
+
+  .marquee-item {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--green-dark);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .marquee-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 60px;
+    height: 3px;
+    background: var(--green);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">VocabLearn!</a>
+  <a class="nav-cta" href="https://play.google.com/store" target="_blank">Download Free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">
+    <span>📱</span>
+    <span>Now available on Google Play</span>
+  </div>
+  <h1>Learn Words.<br><span>Change Your World.</span></h1>
+  <p>Master vocabulary in 10 languages with smart phase-based learning, daily streaks, and word packages designed by language experts.</p>
+  <div class="hero-buttons">
+    <a href="https://play.google.com/store" class="btn-primary" target="_blank">
+      <span>📥</span> Get it on Google Play
+    </a>
+    <a href="#features" class="btn-secondary">See how it works</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">10+</div>
+      <div class="stat-label">Languages</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100+</div>
+      <div class="stat-label">Words per level</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">A1–C2</div>
+      <div class="stat-label">All levels</div>
+    </div>
+  </div>
+</section>
+
+<!-- PHONE MOCKUP -->
+<div class="phone-section">
+  <div class="phone">
+    <div class="phone-screen">
+      <div class="phone-title">VocabLearn!</div>
+      <div class="phone-progress-row">
+        <span>Phase 2 / 5</span>
+        <span>8 / 30 words</span>
+      </div>
+      <div class="phone-progress-bar">
+        <div class="phone-progress-fill"></div>
+      </div>
+      <div class="phone-word-card">
+        <div class="phone-word">Serendipity</div>
+        <div class="phone-hint">Type the translation</div>
+      </div>
+      <div class="phone-input">serendipite...</div>
+      <div class="phone-btn">Check ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item"><span class="marquee-dot"></span> English</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Deutsch</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Español</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Français</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> 日本語</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> 한국어</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Italiano</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Português</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Magyar</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> 中文</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> English</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Deutsch</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Español</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Français</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> 日本語</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> 한국어</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Italiano</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Português</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> Magyar</span>
+    <span class="marquee-item"><span class="marquee-dot"></span> 中文</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Everything you need<br>to actually learn.</h2>
+  <p class="section-sub">No fluff, no gimmicks. Just smart, proven learning mechanics that get words to stick.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">📦</span>
+      <div class="feature-title">Word Packages</div>
+      <div class="feature-desc">Download curated word packs for any language and level — A1 to C2. No typing needed to get started.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎯</span>
+      <div class="feature-title">Phase-Based Learning</div>
+      <div class="feature-desc">10 words per phase keeps you focused. Complete a phase, take a breath, keep going. No overwhelm.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔥</span>
+      <div class="feature-title">Daily Streaks</div>
+      <div class="feature-desc">Build a study habit with streak tracking. Miss a day and it resets — the pressure keeps you consistent.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">Detailed Statistics</div>
+      <div class="feature-desc">Track accuracy, total days studied, longest streak, and progress per word group all in one place.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">✏️</span>
+      <div class="feature-title">Add Your Own Words</div>
+      <div class="feature-desc">Not just pre-made lists — add any word you encounter in real life and study it alongside your packages.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔄</span>
+      <div class="feature-title">Smart Retry</div>
+      <div class="feature-desc">Words you get wrong come back around in the same session until you nail them. Spaced within phases.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">Up and running<br>in 3 steps.</h2>
+  <div class="divider"></div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Pick your language</h3>
+      <p>Select your native language on first launch. The app adapts all translations to your mother tongue.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Download a word pack</h3>
+      <p>Choose from 10 languages × 6 levels. Tap download and your words are instantly ready — no account needed.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Study every day</h3>
+      <p>Complete at least one 10-word phase a day to keep your streak alive. A daily reminder will nudge you if you forget.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<div class="langs-section">
+  <div class="langs-inner">
+    <div class="section-label" style="color: rgba(255,255,255,0.5);">Languages</div>
+    <h2 class="langs-title">10 languages.<br>Thousands of words.</h2>
+    <p class="langs-sub">With A1 through C2 coverage, you'll always have the next challenge ready.</p>
+    <div class="langs-grid">
+      <div class="lang-chip">🇬🇧 English</div>
+      <div class="lang-chip">🇩🇪 Deutsch</div>
+      <div class="lang-chip">🇪🇸 Español</div>
+      <div class="lang-chip">🇫🇷 Français</div>
+      <div class="lang-chip">🇯🇵 日本語</div>
+      <div class="lang-chip">🇰🇷 한국어</div>
+      <div class="lang-chip">🇮🇹 Italiano</div>
+      <div class="lang-chip">🇧🇷 Português</div>
+      <div class="lang-chip">🇭🇺 Magyar</div>
+      <div class="lang-chip">🇨🇳 中文</div>
+    </div>
+  </div>
+</div>
+
+<!-- STREAK -->
+<div class="streak-section">
+  <h2 class="streak-title">Your streak is waiting.<br>Don't break it. 🔥</h2>
+  <p class="streak-sub">Every day you study adds to your streak. Every day you skip resets it. Simple. Brutal. Effective.</p>
+  <a href="https://play.google.com/store" class="btn-primary" style="display:inline-flex; margin: 0 auto;" target="_blank">
+    Start your streak today
+  </a>
+</div>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-title">Ready to <span>actually</span><br>learn a language?</h2>
+  <p class="cta-sub">Free to download. No subscription. No excuses.</p>
+  <a href="https://play.google.com/store" class="btn-primary" style="display:inline-flex; margin: 0 auto; font-size: 1.1rem; padding: 1rem 2.5rem;" target="_blank">
+    📥 Download VocabLearn!
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 VocabLearn! — Built with ❤️ and a daily streak.</p>
+</footer>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const words = [
+  'hello','water','book','house','cat','dog','sun','moon','star','tree',
+  'apple','happy','love','learn','word','study','brain','smart','grow','know',
+  'merhaba','hola','bonjour','ciao','arigatou','danke','merci','gracias',
+  '🇹🇷','🇺🇸','🇩🇪','🇯🇵','🇪🇸','🇫🇷','🇮🇹','🇧🇷','🇰🇷','🇨🇳',
+  '📚','✏️','🔥','⭐','💡','🧠','🎯','📝','💪','🏆'
+];
+
+let drops = [];
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+function initDrops() {
+  drops = [];
+  for (let i = 0; i < 60; i++) {
+    drops.push({
+      text: words[Math.floor(Math.random() * words.length)],
+      x: Math.random() * W,
+      y: Math.random() * H,
+      speed: 0.6 + Math.random() * 1.2,
+      size: 11 + Math.floor(Math.random() * 14),
+      alpha: 0.12 + Math.random() * 0.25
+    });
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  drops.forEach(d => {
+    ctx.save();
+    ctx.globalAlpha = d.alpha;
+    ctx.fillStyle = '#388E3C';
+    ctx.font = `${d.size}px DM Sans, sans-serif`;
+    ctx.fillText(d.text, d.x, d.y);
+    ctx.restore();
+    d.y += d.speed;
+    if (d.y > H + 30) {
+      d.y = -40;
+      d.x = Math.random() * W;
+      d.text = words[Math.floor(Math.random() * words.length)];
+    }
+  });
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', () => { resize(); initDrops(); });
+resize();
+initDrops();
+draw();
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, i * 100);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.feature-card, .step').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
